@@ -7,13 +7,26 @@ My original project from Modules 1-3 was also `Teammates?`. The original goal wa
 ## Demo Walkthrough
 I use screenshots in this README as the walkthrough artifact for the system running end-to-end.
 
-Note: the screenshots you shared in chat are not available to me as local files I can commit directly, so I prepared the repository to store them in `assets/screenshots/`. If you place those provided screenshots there, the links below will render automatically.
+### Landing Screen
+![Landing screen](assets/screenshots/landing-page.png)
 
-- Landing screen: `assets/screenshots/landing-screen.png`
-- Gameplay prompt: `assets/screenshots/gameplay-question.png`
-- Correct verdict: `assets/screenshots/correct-verdict.png`
-- Incorrect verdict: `assets/screenshots/incorrect-verdict.png`
-- Hard-mode example: `assets/screenshots/hard-mode-example.png`
+### Gameplay Prompt
+![Gameplay question](assets/screenshots/gameplay-question.png)
+
+### Alternate Gameplay Example
+![Gameplay question alternate](assets/screenshots/gameplay-question2.png)
+
+### Additional Matchup Example
+![Gameplay question third example](assets/screenshots/gameplay-question3.png)
+
+### Correct Verdict Example
+![Correct verdict](assets/screenshots/correct-verdict.png)
+
+### Correct Negative Verdict Example
+![Correct negative verdict](assets/screenshots/correct-negative-verdict.png)
+
+### Incorrect Verdict Example
+![Incorrect verdict](assets/screenshots/incorrect-verdict.png)
 
 ## Why This Project Matters
 This project shows how AI collaboration can be grounded in evidence instead of imitation. The app does not store “Stephen Curry + Klay Thompson = True” inside the UI. It retrieves each player’s team history, compares overlaps, computes a verdict, and then exposes both an explanation and a confidence score. That same workflow applies to real AI products such as search copilots, internal knowledge systems, and decision-support interfaces.
