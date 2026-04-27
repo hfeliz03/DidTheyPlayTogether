@@ -12,8 +12,13 @@ export function ExplanationPanel({ result, guessedCorrectly }: ExplanationPanelP
 
   return (
     <section className="rounded-[1.5rem] border border-white/10 bg-black/30 p-4 shadow-glow backdrop-blur-md">
-      <div className={`inline-flex rounded-full border px-3 py-1.5 text-xs font-semibold ${verdictTone}`}>
-        {guessedCorrectly ? 'Correct' : 'Incorrect'}
+      <div className="flex flex-wrap items-center gap-2">
+        <div className={`inline-flex rounded-full border px-3 py-1.5 text-xs font-semibold ${verdictTone}`}>
+          {guessedCorrectly ? 'Correct' : 'Incorrect'}
+        </div>
+        <div className="inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-zinc-200">
+          Confidence {result.confidence}%
+        </div>
       </div>
 
       <div className="mt-3 rounded-2xl border border-accent-400/20 bg-accent-500/10 p-4">

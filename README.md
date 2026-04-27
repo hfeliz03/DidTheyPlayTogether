@@ -1,70 +1,85 @@
 # Teammates?
 
-## Title and Summary
-`Teammates?` is a browser-based NBA trivia game built with React, TypeScript, Vite, and Tailwind CSS. It asks a simple but surprisingly sticky question: did two NBA players ever play on the same team for at least one season?
+`Teammates?` is a React + TypeScript web game that asks whether two NBA players ever played together on the same NBA team for at least one season. It matters because it demonstrates a practical AI/RAG-style pattern: retrieve structured evidence first, reason over it second, and only then present a result to the user with an explanation and confidence score.
 
-What makes the project interesting is that the answer is not hardcoded into the UI. The app uses a lightweight local retrieval workflow: it pulls player team-season histories from a structured knowledge base, compares overlaps, and produces a verdict plus a short explanation. The result is a game that feels fast and visual, while still using AI/RAG-style reasoning principles instead of static quiz answers.
+My original project from Modules 1-3 was also `Teammates?`. The original goal was to turn NBA teammate trivia into a retrieval-based system rather than a hardcoded quiz, using player/team/season histories as the source of truth. In its earlier form, the focus was on proving the overlap logic, validating whether teammate answers could be computed reliably, and wrapping that logic in an engaging game flow.
 
-## Original Project (Modules 1-3)
-My original project from Modules 1-3 was also called `Teammates?`. The original goal was to build an engaging sports trivia experience that could answer teammate questions using structured NBA data rather than manually scripted responses. In its earlier form, the focus was on proving the core retrieval logic, validating that player/team/season overlap could be computed correctly, and shaping that logic into a usable interactive game.
+## Demo Walkthrough
+I use screenshots in this README as the walkthrough artifact for the system running end-to-end.
+
+Note: the screenshots you shared in chat are not available to me as local files I can commit directly, so I prepared the repository to store them in `assets/screenshots/`. If you place those provided screenshots there, the links below will render automatically.
+
+- Landing screen: `assets/screenshots/landing-screen.png`
+- Gameplay prompt: `assets/screenshots/gameplay-question.png`
+- Correct verdict: `assets/screenshots/correct-verdict.png`
+- Incorrect verdict: `assets/screenshots/incorrect-verdict.png`
+- Hard-mode example: `assets/screenshots/hard-mode-example.png`
 
 ## Why This Project Matters
-This project matters because it shows how AI-style retrieval and reasoning can improve a small, consumer-facing product. Instead of treating “AI” as a chatbot wrapper, I used it as a design pattern:
+This project shows how AI collaboration can be grounded in evidence instead of imitation. The app does not store “Stephen Curry + Klay Thompson = True” inside the UI. It retrieves each player’s team history, compares overlaps, computes a verdict, and then exposes both an explanation and a confidence score. That same workflow applies to real AI products such as search copilots, internal knowledge systems, and decision-support interfaces.
 
-- retrieve relevant facts
-- reason over those facts
-- explain the answer clearly
-
-That pattern scales beyond trivia. The same approach applies to internal knowledge tools, search systems, support assistants, and workflow copilots where correctness depends on retrieving the right evidence first.
-
-## Features
-- Responsive landing page with difficulty selection
-- Side-by-side player cards with real player headshots
-- True / False gameplay loop with score and streak tracking
-- Local knowledge base of 300+ players
-- Evidence-based teammate checking using team/season overlap
-- Difficulty generation based on matchup familiarity and obscurity
-- Balanced round generation so the game does not skew heavily toward `False`
-- Short explanation after each guess
+## What the Project Does
+- Lets the player choose `Easy`, `Medium`, or `Hard`
+- Shows two NBA players with real headshots
+- Asks whether they were ever teammates
+- Uses a local knowledge base of 300+ players
+- Computes the answer by checking team/season overlap
+- Balances rounds so the game does not degenerate into mostly `False`
+- Returns a short evidence-based explanation
+- Displays a confidence score so the system communicates uncertainty
 
 ## Architecture Overview
-At a high level, the system has four layers:
+At a high level, the app has four layers:
 
 1. `UI Layer`
-   React components render the landing page, player cards, score display, answer buttons, and explanation panel.
+   React components render the landing page, scoreboard, player cards, answer controls, and explanation panel.
 
 2. `Knowledge Base`
-   Player data lives locally in TypeScript/JSON-style structures. Each player record includes a name, headshot, star power rating, and team-season history.
+   Player data lives locally in `src/data/players.ts` and headshot mappings live in `src/data/headshotIds.json`.
 
 3. `Retrieval + Reasoning Layer`
-   The game logic retrieves the two selected player histories, finds shared teams, checks season overlap, and decides whether the answer is true or false.
+   `src/utils/game.ts` retrieves two player records, checks shared teams, computes season overlap, and produces the verdict, explanation, and confidence score.
 
-4. `Difficulty + Matchmaking Layer`
-   A round generator scores candidate matchups based on factors like player popularity, team popularity, number of shared seasons, recency, and whether a pair is a near-miss. It then selects a matchup that fits the chosen difficulty and keeps the true/false distribution reasonable.
+4. `Round Generation Layer`
+   The generator selects candidate matchups, estimates difficulty, and balances true/false output while respecting data quality rules.
 
-If I were drawing the system diagram as a flow, it would look like this:
+### System Architecture Diagram
+```mermaid
+flowchart LR
+    A["User Selects Difficulty"] --> B["Round Generator"]
+    B --> C["Retrieve Player A Record"]
+    B --> D["Retrieve Player B Record"]
+    C --> E["Compare Team Histories"]
+    D --> E
+    E --> F["Check Shared Team + Season Overlap"]
+    F --> G["Verdict: True / False"]
+    F --> H["Confidence Score"]
+    G --> I["Explanation Panel"]
+    H --> I
+    I --> J["Next Round / Restart"]
+```
 
-`User input -> Difficulty selection -> Round generator -> Retrieve two player records -> Compare team-season histories -> Produce verdict -> Render explanation`
-
-## Project Structure
+## Repository Structure
 - `src/App.tsx`
-  Main application flow and state management.
+  Main game state and round flow.
 - `src/components/`
-  Reusable UI pieces such as player cards, scoreboard, and explanation panel.
+  UI components like player cards, scoreboard, and explanation panel.
 - `src/data/players.ts`
-  Local player knowledge base.
+  Local player dataset.
 - `src/data/headshotIds.json`
-  Official NBA headshot ID mapping used to guarantee real player images.
+  Official NBA headshot ID mapping for the fixed roster.
 - `src/utils/game.ts`
-  Match generation, difficulty scoring, retrieval, and teammate checking logic.
+  Match generation, teammate checking, explanation generation, and confidence scoring.
+- `assets/`
+  Reserved for screenshots, diagrams, and demo assets.
+- `model_card.md`
+  Reflection document covering AI collaboration, bias, risks, and testing outcomes.
 
 ## Setup Instructions
-Run the project locally with the following steps:
-
 1. Clone the repository.
-2. Move into the project folder.
+2. Move into the project directory.
 3. Install dependencies.
-4. Start the development server.
+4. Start the dev server.
 
 ```bash
 git clone <your-repo-url>
@@ -73,144 +88,137 @@ npm install
 npm run dev
 ```
 
-Then open the local Vite URL shown in your terminal, usually:
+Then open the Vite URL shown in your terminal, usually:
 
 ```bash
 http://localhost:5173
 ```
 
-## How the AI/RAG-Style Logic Works
-The app uses a local retrieval pattern instead of embedding answers in the interface.
-
-For each round:
-
-1. The generator selects two players.
-2. The system retrieves both players’ team histories.
-3. It checks for matching team names.
-4. It checks whether those teams overlap in at least one season.
-5. If they overlap, the answer is `True`.
-6. If not, the answer is `False`.
-7. The system returns a short explanation based on the retrieved evidence.
-
-Example internal reasoning:
-
-- Player A: LeBron James -> Cleveland Cavaliers (`2014-15`, `2015-16`, `2016-17`)
-- Player B: Kyrie Irving -> Cleveland Cavaliers (`2014-15`, `2015-16`, `2016-17`)
-- Overlap found -> `True`
-
 ## Sample Interactions
-These are representative examples of the game’s behavior.
+These examples show the actual retrieval-style behavior of the game.
 
 ### Example 1
 Input:
 - Difficulty: `Easy`
-- Players: `Stephen Curry` and `Klay Thompson`
+- Players: `Jaylen Brown` and `Jayson Tatum`
 - User guess: `True`
 
-AI/game output:
+AI output:
 - Verdict: `Correct`
-- Explanation: `Stephen Curry and Klay Thompson played together on the Golden State Warriors from 2011-12 to 2023-24.`
+- Confidence: `99%`
+- Explanation: `Jaylen Brown and Jayson Tatum played together on the Boston Celtics from 2017-18 to 2023-24.`
 
 ### Example 2
 Input:
-- Difficulty: `Medium`
-- Players: `Ja Morant` and `Derrick Rose`
-- User guess: `True`
+- Difficulty: `Easy`
+- Players: `Luka Doncic` and `Nikola Jokic`
+- User guess: `False`
 
-AI/game output:
+AI output:
 - Verdict: `Correct`
-- Explanation: `Ja Morant and Derrick Rose played together on the Memphis Grizzlies from 2023-24.`
+- Confidence: `90%`
+- Explanation: `Luka Doncic and Nikola Jokic never shared an NBA team.`
 
 ### Example 3
 Input:
 - Difficulty: `Hard`
-- Players: `Kevin Durant` and `Dwight Howard`
-- User guess: `True`
+- Players: `Seth Curry` and `Nick Richards`
+- User guess: `False`
 
-AI/game output:
+AI output:
 - Verdict: `Incorrect`
-- Explanation: `Kevin Durant and Dwight Howard never shared an NBA team.`
+- Confidence: `86%`
+- Explanation: `Seth Curry and Nick Richards played together on the Charlotte Hornets from 2023-24.`
 
-## Design Decisions
-I made several deliberate design choices while building this project.
+## Reliability and Evaluation
+This project includes an explicit reliability mechanism rather than only asserting answers.
 
-### 1. Local knowledge base instead of live API queries
-I kept the dataset local because the game needs to feel instant, deterministic, and easy to run for evaluation. This avoids API latency, authentication issues, and rate limits.
+### Confidence Scoring
+Each verdict includes a confidence score based on:
+- whether both players come from the trusted multi-season historical dataset
+- whether the result comes from direct season overlap
+- how many overlapping seasons exist
+- whether the result depends on weaker snapshot-style roster data
 
-Trade-off:
-- Faster and more reliable locally
-- But requires manual care to keep roster and history data current
+This gives the user a visible indication of how strongly the system trusts its own answer.
 
-### 2. Retrieval-driven verdicts instead of hardcoded answers
-I wanted the answer to come from the same data model the explanation uses. This makes the system more trustworthy and much easier to scale.
+### Human Evaluation
+I manually spot-checked generated outputs against real NBA roster history and corrected failure cases. This process surfaced an important issue: fixed one-season roster snapshots were safe for some true teammate claims, but unsafe for all false claims. I changed the generator so snapshot-only players can support safe true matchups but do not produce unsafe false negatives.
 
-Trade-off:
-- Cleaner logic and better explainability
-- More effort required to structure and validate the player data
+### Error Handling by Design
+I also added structural safeguards:
+- every player in the fixed roster has a mapped headshot
+- historical and snapshot data are treated differently
+- true/false distribution is balanced at generation time
 
-### 3. Fixed player pool with real headshots
-The app uses a fixed roster so every player in the experience has a known image source and known trajectory quality.
-
-Trade-off:
-- Better polish and consistency
-- Not as broad as a fully live, league-wide database
-
-### 4. Two-tier data trust model
-The project distinguishes between:
-- `historical` player records with multi-season trajectories
-- `roster_snapshot` records that came from a fixed-season expansion
-
-This was necessary because a stale one-season roster is safe for generating some `True` matchups, but unsafe for generating all `False` matchups.
+## Design Decisions and Trade-Offs
+### Local knowledge base instead of live API calls
+I kept the project local for speed, determinism, and ease of grading.
 
 Trade-off:
-- Better correctness
-- More complex round-generation logic
+- fast and reliable to run
+- but the data must be updated manually
 
-### 5. Difficulty as a scoring formula
-Instead of hand-authoring every round, I built a formula that estimates difficulty from:
-- player popularity
-- team popularity
-- shared championships
-- number of seasons together
-- recency
-- near-miss situations
+### Retrieval-based answers instead of hardcoded UI facts
+I wanted the explanation and verdict to come from the same evidence source.
 
 Trade-off:
-- Much more replayability
-- Requires tuning and can still produce edge cases if the data is stale
+- more trustworthy and scalable
+- but more sensitive to data quality problems
+
+### Fixed roster with real images
+I used a fixed player pool so every player in the game has a known headshot and known data profile.
+
+Trade-off:
+- strong visual quality and fewer broken states
+- but less broad than a fully live league database
+
+### Two-tier data trust model
+Players are tagged as either `historical` or `roster_snapshot`.
+
+Trade-off:
+- better factual safety
+- more complex round-generation logic
+
+### Formula-based difficulty
+Difficulty is driven by factors like fame, recency, shared seasons, titles, and team popularity.
+
+Trade-off:
+- much more replayability
+- requires tuning and can expose bad data faster
 
 ## Testing Summary
 ### What worked
-- Core teammate overlap logic worked well once the player histories were structured consistently.
-- Real headshot mapping worked after I generated a complete player-to-ID map.
-- The true/false round mix improved significantly after balancing was added.
-- The single-screen game layout became much smoother after compressing the play state and swapping answer/explanation content in the same panel.
+- Team/season overlap logic reliably identified obvious teammate pairs.
+- The headshot mapping system now guarantees a real player image for the fixed roster.
+- Confidence scoring exposed the difference between stronger and weaker evidence.
+- The single-screen play layout became more usable after the answer panel was restructured.
 
 ### What did not work initially
-- Random pair generation strongly overproduced `False` answers because most NBA players have never been teammates.
-- Some expanded roster entries were based on a frozen season snapshot, which created stale false negatives when real-life trades changed teams later.
-- The image system briefly regressed when card state reused the previous image and when placeholder behavior masked missing data too aggressively.
+- Naive random pairing produced far too many `False` rounds.
+- Snapshot-only roster data created stale false negatives after real-world roster changes.
+- Image fallback behavior briefly masked data issues instead of solving them.
 
-### What I learned from testing
-- Data quality matters more than UI polish when a product claims factual correctness.
-- “Works on sample cases” is not enough when the generator can produce edge-case combinations.
-- For AI-style products, the trust boundary is the data model, not the interface.
+### What I learned
+- AI systems fail at the data boundary before they fail in the UI.
+- Replayable generators reveal correctness bugs faster than static demos.
+- A confidence score is useful, but only if the underlying heuristics are honest about uncertainty.
 
 ## Reflection
-This project taught me that AI problem-solving is often less about generating text and more about building a reliable reasoning pipeline. The most important work was not the final explanation sentence, but making sure the app retrieved the right facts, used those facts consistently, and respected uncertainty in weaker data.
+This project taught me that AI problem-solving is less about making a system sound intelligent and more about making it reason from trustworthy evidence. The most important work was building the retrieval pipeline, constraining unsafe generation patterns, and exposing confidence rather than pretending every answer is equally certain.
 
-It also reinforced a practical lesson: when you build systems that appear intelligent, users judge them on the first obvious failure. A single incorrect sports fact can undermine confidence in the whole experience. That pushed me to think more carefully about data freshness, fallback strategies, and where a system should refuse to make claims unless the underlying evidence is strong enough.
+It also reinforced that a single visible factual error can destroy user trust. That shaped how I thought about data freshness, evaluation, and failure handling. From a portfolio standpoint, this project shows that I can build a polished interface, structure a local knowledge system, debug correctness problems, and make defensible trade-offs between UX, replayability, and factual reliability.
 
-From a portfolio perspective, this project represents more than a trivia game. It shows that I can:
-
-- design a full-stack-feeling frontend application
-- structure local knowledge for retrieval-based reasoning
-- debug product correctness issues, not just syntax issues
-- make trade-offs between replayability, polish, and factual trust
+## Required Submission Files
+- Functional code: included
+- `README.md`: included
+- `model_card.md`: included
+- System architecture diagram: embedded in this README
+- Dedicated asset folder: `assets/`
 
 ## Future Improvements
-- Upgrade the historical dataset so all 300+ players use full multi-season trajectories
-- Add a visible “data freshness” policy to clarify what seasons are covered
-- Add unit tests for overlap logic and difficulty scoring
-- Add analytics to tune difficulty using real player behavior
-- Add animation/sound polish for even stronger game feel
+- Expand the number of players with full multi-season historical trajectories
+- Add automated regression tests for known teammate and non-teammate pairs
+- Add a visible data freshness statement in the UI
+- Add analytics to tune difficulty based on real play behavior
+- Add a Loom video link if a narrated demo is later recorded

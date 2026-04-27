@@ -141,11 +141,23 @@ export const checkTeammates = (playerA: Player, playerB: Player): TeammateCheckR
 
   const isTeammates = overlappingSeasons.length > 0;
   const primaryOverlap = overlappingSeasons[0];
+  const bothHistorical =
+    playerA.dataProfile === 'historical' && playerB.dataProfile === 'historical';
+  const hasSnapshotPlayer =
+    playerA.dataProfile === 'roster_snapshot' || playerB.dataProfile === 'roster_snapshot';
+  const confidence = isTeammates
+    ? clamp(
+        (bothHistorical ? 92 : 84) +
+          (primaryOverlap ? Math.min(primaryOverlap.seasons.length, 4) * 2 : 0),
+        0,
+        99,
+      )
+    : clamp(bothHistorical ? 90 : hasSnapshotPlayer ? 62 : 78, 0, 99);
   const reasoning = isTeammates
     ? `${playerA.name} and ${playerB.name} played together on the ${primaryOverlap.team} from ${formatSeasonSpan(primaryOverlap.seasons)}.`
     : `${playerA.name} and ${playerB.name} never shared an NBA team.`;
 
-  return { isTeammates, overlappingSeasons, evidence, reasoning };
+  return { isTeammates, confidence, overlappingSeasons, evidence, reasoning };
 };
 
 export const scorePairDifficulty = (playerA: Player, playerB: Player): PairDifficultyProfile => {

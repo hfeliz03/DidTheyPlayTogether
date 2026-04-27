@@ -24,6 +24,7 @@ export type RetrievedEvidence = {
 
 export type TeammateCheckResult = {
   isTeammates: boolean;
+  confidence: number;
   overlappingSeasons: {
     team: string;
     seasons: string[];
